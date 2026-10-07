@@ -57,6 +57,7 @@ async def students(request: Request):
     return {"students": students}
 
 
+@authorize()
 @template("student.jinja2")
 async def student(request: Request):
     app: Application = request.app
