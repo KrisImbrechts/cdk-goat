@@ -16,8 +16,8 @@
     {% for (course, marks) in results %}
         <div class="card hoverable">
         <div class="card-content">
-            <span class="card-title">{{ course.title }}</span>
-            <p>{{ course.description }}</p>
+            <span class="card-title">{{ course.title | e }}</span>
+            <p>{{ course.description | e }}</p>
             <table class="responsive-table bordered highlight">
                 <thead>
                 <tr>
