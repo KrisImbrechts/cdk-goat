@@ -13,7 +13,7 @@
 {% block content %}
     <div class="collection">
         {% for (id, name) in students %}
-            <a class="collection-item" href="/students/{{ id }}">{{ name }}</a>
+            <a class="collection-item" href="/students/{{ id }}">{{ name | e }}</a>
         {% endfor %}
     </div>
 {% endblock %}

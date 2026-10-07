@@ -22,10 +22,10 @@
 {% block aside %}
     <div class="collection">
         <a class="collection-item" href="/students/{{ student.id }}">
-            Back to student {{ student.name }}
+            Back to student {{ student.name | e }}
         </a>
         <a class="collection-item" href="/courses/{{ course.id }}">
-            Back to course {{ course.name }}
+            Back to course {{ course.title | e }}
         </a>
     </div>
 {% endblock %}

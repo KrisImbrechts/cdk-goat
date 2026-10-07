@@ -14,8 +14,8 @@
     <div class="collection">
         {% for course in courses %}
             <a href="/courses/{{ course.id }}" class="collection-item">
-                {{ course.title }}
-                <span class="secondary-content">{{ course.description }}</span>
+                {{ course.title | e }}
+                <span class="secondary-content">{{ course.description | e }}</span>
             </a>
         {% endfor %}
     </div>
