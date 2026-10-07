@@ -1,5 +1,6 @@
 """Containers CDK construct module."""
 import aws_cdk as cdk
+from aws_cdk import aws_certificatemanager as acm
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_ecr_assets as ecr_assets
@@ -29,6 +30,8 @@ class ContainersConstruct(Construct):
         storage_bucket: s3.IBucket,
         *,
         prefix=None,
+        certificate_arn: str = None,
+        domain_name: str = None,
     ):
         """Construct initialization."""
         super().__init__(scope, id)
@@ -164,7 +167,35 @@ class ContainersConstruct(Construct):
             },
         )
 
-        ecs_service = ecs_patterns.ApplicationLoadBalancedFargateService(  # noqa: F841
+        # Enforce HTTPS for secure transport of authentication credentials
+        # A certificate MUST be provided - no insecure HTTP fallback
+        if not certificate_arn and not domain_name:
+            raise ValueError(
+                "SECURITY REQUIREMENT: TLS certificate must be provided. "
+                "This application handles authentication credentials and requires HTTPS. "
+                "Provide either 'certificate_arn' (for existing ACM certificate) "
+                "or 'domain_name' (to create a new ACM certificate with DNS validation). "
+                "To create a certificate manually: "
+                "aws acm request-certificate --domain-name your-domain.com --validation-method DNS"
+            )
+        
+        # Import or create certificate
+        certificate = None
+        if certificate_arn:
+            certificate = acm.Certificate.from_certificate_arn(
+                self, "Certificate", certificate_arn
+            )
+        elif domain_name:
+            # Create a certificate for the domain with DNS validation
+            certificate = acm.Certificate(
+                self,
+                "Certificate",
+                domain_name=domain_name,
+                validation=acm.CertificateValidation.from_dns(),
+            )
+
+        # Configure service with HTTPS only - no insecure HTTP option
+        ecs_service = ecs_patterns.ApplicationLoadBalancedFargateService(
             self,
             "EcsService",
             cluster=ecs_cluster,
@@ -177,8 +208,10 @@ class ContainersConstruct(Construct):
             desired_count=1,
             max_healthy_percent=200,
             min_healthy_percent=50,
-            protocol=lb.ApplicationProtocol.HTTP,
-            listener_port=80,
+            protocol=lb.ApplicationProtocol.HTTPS,
+            listener_port=443,
+            certificate=certificate,
+            redirect_http=True,
             enable_ecs_managed_tags=True,
         )
 

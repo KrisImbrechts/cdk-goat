@@ -58,8 +58,15 @@ class NetworkConstruct(Construct):
 
         lb_sg.connections.allow_from(
             ec2.Peer.ipv4(cidr_ip=ALLOWED_CIDR),
+            port_range=ec2.Port.tcp(443),
+            description="Allow HTTPS traffic from development endpoints",
+        )
+
+        # Allow HTTP for redirect to HTTPS
+        lb_sg.connections.allow_from(
+            ec2.Peer.ipv4(cidr_ip=ALLOWED_CIDR),
             port_range=ec2.Port.tcp(80),
-            description="Allow traffic from development endpoints",
+            description="Allow HTTP traffic for redirect to HTTPS",
         )
 
         db_sg.connections.allow_from(
