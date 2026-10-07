@@ -45,6 +45,7 @@ async def index(request: Request):
     return {"last_visited": last_visited, "errors": errors, "auth_user": auth_user}
 
 
+@authorize()
 @template("students.jinja2")
 async def students(request: Request):
     app: Application = request.app
@@ -57,6 +58,7 @@ async def students(request: Request):
     return {"students": students}
 
 
+@authorize()
 @template("student.jinja2")
 async def student(request: Request):
     app: Application = request.app
@@ -76,6 +78,7 @@ async def student(request: Request):
     return {"student": student, "results": results}
 
 
+@authorize()
 @template("courses.jinja2")
 async def courses(request: Request):
     app: Application = request.app
@@ -88,6 +91,7 @@ async def courses(request: Request):
     return {"courses": courses}
 
 
+@authorize()
 @template("course.jinja2")
 async def course(request: Request):
     app: Application = request.app
@@ -101,6 +105,7 @@ async def course(request: Request):
     return {"course": course, "reviews": reviews, "students": students}
 
 
+@authorize()
 @template("review.jinja2")
 async def review(request: Request):
     app: Application = request.app
@@ -124,6 +129,7 @@ async def review(request: Request):
         return {"course": course, "errors": {}}
 
 
+@authorize()
 @template("evaluate.jinja2")
 async def evaluate(request: Request):
     app: Application = request.app
