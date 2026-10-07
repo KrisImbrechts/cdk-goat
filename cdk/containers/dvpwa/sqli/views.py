@@ -48,13 +48,16 @@ async def index(request: Request):
 @template("students.jinja2")
 async def students(request: Request):
     app: Application = request.app
+    auth_user = await get_auth_user(request)
     if request.method == "POST":
+        if not auth_user:
+            raise HTTPForbidden()
         data = await request.post()
         async with app["db"].acquire() as conn:
             await Student.create(conn, data["name"])
     async with app["db"].acquire() as conn:
         students = await Student.get_many(conn)
-    return {"students": students}
+    return {"students": students, "auth_user": auth_user}
 
 
 @template("student.jinja2")
