@@ -3,7 +3,7 @@ from datetime import datetime
 from itertools import groupby
 
 from aiohttp.web import Application, HTTPFound, Request
-from aiohttp.web_exceptions import HTTPForbidden, HTTPNotFound
+from aiohttp.web_exceptions import HTTPForbidden, HTTPNotFound, HTTPUnauthorized
 from aiohttp_jinja2 import template
 from aiohttp_session import get_session
 from sqli.dao.course import Course
@@ -49,6 +49,9 @@ async def index(request: Request):
 async def students(request: Request):
     app: Application = request.app
     if request.method == "POST":
+        auth_user = await get_auth_user(request)
+        if not auth_user:
+            raise HTTPUnauthorized()
         data = await request.post()
         async with app["db"].acquire() as conn:
             await Student.create(conn, data["name"])
@@ -80,6 +83,9 @@ async def student(request: Request):
 async def courses(request: Request):
     app: Application = request.app
     if request.method == "POST":
+        auth_user = await get_auth_user(request)
+        if not auth_user or not auth_user.is_admin:
+            raise HTTPForbidden()
         data = await request.post()
         async with app["db"].acquire() as conn:
             await Course.create(conn, data["title"], data["description"])
@@ -110,6 +116,9 @@ async def review(request: Request):
         if not course:
             raise HTTPNotFound()
         if request.method == "POST":
+            auth_user = await get_auth_user(request)
+            if not auth_user:
+                raise HTTPUnauthorized()
             data = await request.post()
             review_text = data.get("review_text")
             if not review_text:
