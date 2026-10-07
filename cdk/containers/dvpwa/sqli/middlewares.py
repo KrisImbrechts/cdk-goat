@@ -15,7 +15,14 @@ async def session_middleware(request, handler):
     # Do the trick, by passing app & handler back to original session
     # middleware factory. Do not forget to await on results here as original
     # session middleware factory is also awaitable.
-    storage = SimpleCookieStorage()
+    # Configure secure session cookies with httponly and secure flags
+    storage = SimpleCookieStorage(
+        cookie_name="AIOHTTP_SESSION",
+        max_age=3600,  # 1 hour session timeout
+        secure=True,  # Require HTTPS
+        httponly=True,  # Prevent JavaScript access
+        samesite="Strict",  # CSRF protection
+    )
     middleware = session_middleware_(storage)
     return await middleware(request, handler)
 
