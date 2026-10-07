@@ -80,6 +80,9 @@ async def student(request: Request):
 async def courses(request: Request):
     app: Application = request.app
     if request.method == "POST":
+        auth_user = await get_auth_user(request)
+        if not auth_user or not auth_user.is_admin:
+            raise HTTPForbidden()
         data = await request.post()
         async with app["db"].acquire() as conn:
             await Course.create(conn, data["title"], data["description"])

@@ -22,7 +22,7 @@ def init():
         app,
         loader=PackageLoader("sqli", "templates"),
         context_processors=[csrf_processor, auth_user_processor],
-        autoescape=False,
+        autoescape=True,
     )
     setup_database(app)
     setup_routes(app)
