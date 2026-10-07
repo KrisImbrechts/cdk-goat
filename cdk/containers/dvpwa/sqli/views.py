@@ -124,6 +124,7 @@ async def review(request: Request):
         return {"course": course, "errors": {}}
 
 
+@authorize(ensure_admin=True)
 @template("evaluate.jinja2")
 async def evaluate(request: Request):
     app: Application = request.app
